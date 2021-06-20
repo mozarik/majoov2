@@ -18,7 +18,8 @@ type RegisterUserBody struct {
 func RegisterUser(c echo.Context) error {
 
 	// v := validator.New()
-
+	db, _ := c.Get("db").(*gorm.DB)
+	repo := repository.NewUserRepository(db)
 	var body RegisterUserBody
 
 	err := c.Bind(&body)
@@ -26,8 +27,15 @@ func RegisterUser(c echo.Context) error {
 		return err
 	}
 
-	// Validate struct
 	// err = v.Struct(&body)
+	// Validate body
+	status, _ := repo.UsernameIsInDb(body.Username)
+	if !status {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Username already exist",
+		})
+	}
+
 	err = c.Validate(&body)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -35,15 +43,12 @@ func RegisterUser(c echo.Context) error {
 		})
 	}
 
-	db, _ := c.Get("db").(*gorm.DB)
-
 	u := &model.User{
 		Username: body.Username,
 		Password: body.Password,
 		Role:     body.Role,
 	}
 
-	repo := repository.NewUserRepository(db)
 	err = repo.Register(u)
 	if err != nil {
 		return err

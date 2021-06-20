@@ -33,3 +33,12 @@ func (u *userRepository) FindById(id uint) error {
 
 	return u.db.First(&user, id).Error
 }
+
+func (u *userRepository) UsernameIsInDb(username string) (bool, error) {
+	var user model.User
+	result := u.db.Where("username = ?", username).First(&user)
+	if result.Error != nil {
+		return true, result.Error
+	}
+	return false, result.Error
+}
