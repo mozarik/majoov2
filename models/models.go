@@ -16,23 +16,19 @@ type User struct {
 	Merchant *Merchant `gorm:"foreignkey:UserID;association_foreignkey:ID"`
 }
 
-func (u *User) Create(db *gorm.DB, user *User) error {
-	return db.Create(user).Error
-}
-
 type Merchant struct {
 	gorm.Model
-	Product []Product `gorm:"foreignkey:MerchantID;association_foreignkey:ID"`
-	Outlet  []Outlet  `gorm:"foreignkey:MerchantID;association_foreignkey:ID"`
-	UserID  uint
+	Product []Product `gorm:"foreignkey:MerchantID;association_foreignkey:ID" json:"product"`
+	Outlet  []Outlet  `gorm:"foreignkey:MerchantID;association_foreignkey:ID" json:"outlet"`
+	UserID  uint      `json:"user_id"`
 }
 
 type Product struct {
 	gorm.Model
-	Name       string
-	Sku        uint
-	Image      string
-	MerchantID uint
+	Name       string `json:"name"`
+	Sku        uint   `json:"sku"`
+	Image      string `json:"image"`
+	MerchantID uint   `json:"merchant_id"`
 }
 
 type ProductOutlet struct {
