@@ -33,7 +33,7 @@ This is an implementation of the test case from majoo implemented in Go.
 - [ ] Implement form-validation
 
 - [ ] CRUD of Master Data User
-  - [ ] Create (Register) User
+  - [x] Create (Register) User
   - [ ] Read User
     - [ ] Read All User ? 
   - [ ] Update User
