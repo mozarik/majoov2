@@ -11,8 +11,12 @@ func main() {
 
 	model.Migrate(db)
 
-	user := model.User{}
-	err = user.Create("zein", "123456", "merchant", db)
+	user := &model.User{
+		Username: "username",
+		Password: "password",
+		Role:     "merchant",
+	}
+	err = user.Create(db, user)
 	if err != nil {
 		panic(err)
 	}

@@ -15,9 +15,9 @@ This is an implementation of the test case from majoo implemented in Go.
 ### Implementation
 ---
 
-- [ ] Make the Physical Model with  GORM
-  - [ ] Connect to Postgre
-  - [ ] Setup basic model and do automigrate with GORM db.Automigrate
+- [x] Make the Physical Model with  GORM 
+  - [x] Connect to Postgre
+  - [x] Setup basic model and do automigrate with GORM db.Automigrate
 - [ ] Make login functionality 
   - [ ] Implement the JWT token
   - [ ] Implement the logout to clear the cache in the cookie

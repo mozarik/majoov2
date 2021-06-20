@@ -16,12 +16,7 @@ type User struct {
 	Merchant *Merchant `gorm:"foreignkey:UserID;association_foreignkey:ID"`
 }
 
-func (u *User) Create(username string, password string, role string, db *gorm.DB) error {
-	user := &User{
-		Username: username,
-		Password: password,
-		Role:     role,
-	}
+func (u *User) Create(db *gorm.DB, user *User) error {
 	return db.Create(user).Error
 }
 
