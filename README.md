@@ -33,5 +33,11 @@ This is an implementation of the test case from majoo implemented in Go.
 - [ ] Implement form-validation
 
 - [ ] CRUD of Master Data User
-  - [ ] 
+  - [ ] Create (Register) User
+  - [ ] Read User
+    - [ ] Read All User ? 
+  - [ ] Update User
+    - [ ] Make sure the user is log in
+  - [ ] Delete User
+    - [ ] Make sure the user who delete is the user itself
 - [ ] CRUD of Master Data Produk

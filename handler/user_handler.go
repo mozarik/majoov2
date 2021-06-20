@@ -9,13 +9,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type RegisterUserBody struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
-	Role     string `json:"role" validate:"required,oneof=merchant outlet"`
-}
-
 func RegisterUser(c echo.Context) error {
+	type RegisterUserBody struct {
+		Username string `json:"username" validate:"required"`
+		Password string `json:"password" validate:"required"`
+		Role     string `json:"role" validate:"required,oneof=merchant outlet"`
+	}
 
 	// v := validator.New()
 	db, _ := c.Get("db").(*gorm.DB)
