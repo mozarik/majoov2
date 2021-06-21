@@ -12,36 +12,43 @@ type User struct {
 	Username string
 	Password string
 	Role     string
-	Outlet   *Outlet   `gorm:"foreignkey:UserID;association_foreignkey:ID"`
 	Merchant *Merchant `gorm:"foreignkey:UserID;association_foreignkey:ID"`
+	Outlet   *Outlet   `gorm:"foreignkey:UserID;association_foreignkey:ID"`
 }
 
 type Merchant struct {
 	gorm.Model
-	Product []Product `gorm:"foreignkey:MerchantID;association_foreignkey:ID" json:"product"`
-	Outlet  []Outlet  `gorm:"foreignkey:MerchantID;association_foreignkey:ID" json:"outlet"`
-	UserID  uint      `json:"user_id"`
+	UserID          uint              `json:"user_id"`
+	MerchantProduct []MerchantProduct `gorm:"foreignkey:MerchantID;association_foreignkey:ID" json:"product"`
+	Outlet          []Outlet          `gorm:"foreignkey:MerchantID;association_foreignkey:ID" json:"outlet"`
+}
+
+type MerchantProduct struct {
+	Product    []Product `gorm:"foreignkey:ID ;association_foreignkey:Product_id" json:"product"`
+	Product_id uint      `gorm:"primarykey" json:"product_id"`
+	MerchantID uint      `json:"merchant_id"`
 }
 
 type Product struct {
 	gorm.Model
-	Name       string `json:"name"`
-	Sku        uint   `json:"sku"`
-	Image      string `json:"image"`
-	MerchantID uint   `json:"merchant_id"`
+	Name  string `json:"name"`
+	Sku   uint   `json:"sku"`
+	Image string `json:"image"`
 }
 
 type ProductOutlet struct {
 	gorm.Model
-	Product  []Product `gorm:"foreignkey:MerchantID;association_foreignkey:ID"`
-	Price    uint
-	OutletID uint
+	Product    []MerchantProduct `gorm:"foreignkey:Product_id;association_foreignkey:Product_id" json:"product"`
+	Outlet     []*Outlet         `gorm:"many2many:join_table"`
+	Product_id uint
+	Outlet_id  uint
+	Price      uint
 }
 
 type Outlet struct {
 	gorm.Model
 	UserID     uint
-	Product    []ProductOutlet `gorm:"foreignkey:OutletID;association_foreignkey:ID"`
+	Product    []ProductOutlet `gorm:"many2many:join_table"`
 	MerchantID uint
 }
 

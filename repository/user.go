@@ -53,3 +53,12 @@ func (u *userRepository) GetPassword(username string) (string, error) {
 	}
 	return user.Password, nil
 }
+
+func (u *userRepository) GetIDByUsername(username string) (uint, error) {
+	var id uint
+	err := u.db.Raw("SELECT id from users WHERE username = ?", username).Find(&id)
+	if err.Error != nil {
+		return 0, err.Error
+	}
+	return id, nil
+}

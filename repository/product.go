@@ -24,11 +24,21 @@ func NewProductRepository(db *gorm.DB) *productRepository {
 }
 
 func (p *productRepository) CreateProduct(product *model.Product) error {
-	panic("not implemented") // TODO: Implement
+	return p.db.Create(product).Save(product).Error
 }
 
-func (p *productRepository) GetAllProduct(username string) error {
-	panic("not implemented") // TODO: Implement
+func (p *productRepository) GetAllProduct(username string) (*model.Product, error) {
+	var product model.Product
+	id, err := NewUserRepository(p.db).GetIDByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.db.Where("merchant_id = ?", id).Find(&product).Error
+	if err != nil {
+		return nil, err
+	}
+	return &product, nil
 }
 
 func (p *productRepository) UpdateProduct() {

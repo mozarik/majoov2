@@ -34,7 +34,10 @@ func main() {
 	e.POST("/login", handler.Login)
 	e.POST("/logout", handler.Logout)
 
+	e.POST("/product/add", handler.RegisterAProduct)
+
 	adminGroup := e.Group("/admin")
+
 	adminGroup.Use(echomid.JWTWithConfig(echomid.JWTConfig{
 		Claims:                  &auth.Claims{},
 		SigningKey:              []byte(auth.GetJWTSecret()),
@@ -43,7 +46,7 @@ func main() {
 	}))
 
 	adminGroup.Use(auth.TokenRefresherMiddleware)
-	adminGroup.GET("", handler.Admin())
+	adminGroup.GET("", handler.Admin)
 
 	e.Logger.Fatal(e.Start(":4001"))
 }
