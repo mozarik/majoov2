@@ -19,6 +19,7 @@ type User struct {
 type Merchant struct {
 	gorm.Model
 	UserID          uint              `json:"user_id"`
+	Name            string            `json:"name"`
 	MerchantProduct []MerchantProduct `gorm:"foreignkey:MerchantID;association_foreignkey:ID" json:"product"`
 	Outlet          []Outlet          `gorm:"foreignkey:MerchantID;association_foreignkey:ID" json:"outlet"`
 }

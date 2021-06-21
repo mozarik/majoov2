@@ -34,8 +34,8 @@ func main() {
 	e.POST("/login", handler.Login)
 	e.POST("/logout", handler.Logout)
 
-	e.POST("/product/add", handler.RegisterAProduct)
-
+	// e.POST("/product/add", handler.RegisterAProduct)
+	e.POST("/merchant/register", handler.RegisterMerchant)
 	adminGroup := e.Group("/admin")
 
 	adminGroup.Use(echomid.JWTWithConfig(echomid.JWTConfig{
