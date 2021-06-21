@@ -41,6 +41,7 @@ func (u *userRepository) UsernameIsInDb(username string) (bool, error) {
 	if result.Error != nil {
 		return true, result.Error
 	}
+
 	return false, result.Error
 }
 
