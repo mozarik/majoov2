@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// func ReadAllUser()
+
 func RegisterUser(c echo.Context) error {
 	type RegisterUserBody struct {
 		Username string `json:"username" validate:"required"`

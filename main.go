@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	echomid "github.com/labstack/echo/v4/middleware"
+	"github.com/mozarik/majoov2/auth"
 	"github.com/mozarik/majoov2/handler"
 	"github.com/mozarik/majoov2/middleware"
 	model "github.com/mozarik/majoov2/models"
@@ -29,6 +31,19 @@ func main() {
 
 	e.GET("/", Ping)
 	e.POST("/register", handler.RegisterUser)
+	e.POST("/login", handler.Login)
+	e.POST("/logout", handler.Logout)
+
+	adminGroup := e.Group("/admin")
+	adminGroup.Use(echomid.JWTWithConfig(echomid.JWTConfig{
+		Claims:                  &auth.Claims{},
+		SigningKey:              []byte(auth.GetJWTSecret()),
+		TokenLookup:             "cookie:access-token",
+		ErrorHandlerWithContext: auth.JWTErrorChecker,
+	}))
+
+	adminGroup.Use(auth.TokenRefresherMiddleware)
+	adminGroup.GET("", handler.Admin())
 
 	e.Logger.Fatal(e.Start(":4001"))
 }

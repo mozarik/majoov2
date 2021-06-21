@@ -37,8 +37,18 @@ func (u *userRepository) FindById(id uint) error {
 func (u *userRepository) UsernameIsInDb(username string) (bool, error) {
 	var user model.User
 	result := u.db.Where("username = ?", username).First(&user)
+
 	if result.Error != nil {
 		return true, result.Error
 	}
 	return false, result.Error
+}
+
+func (u *userRepository) GetPassword(username string) (string, error) {
+	var user model.User
+	result := u.db.Where("username = ?", username).First(&user)
+	if result.Error != nil {
+		return "", result.Error
+	}
+	return user.Password, nil
 }
