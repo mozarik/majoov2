@@ -25,8 +25,11 @@ func NewRegisterProductBody() *RegisterProductBody {
 
 func RegisterAProduct(c echo.Context) error {
 	db, _ := c.Get("db").(*gorm.DB)
+
+	// WHY IT HAVE TO BE LIKE THIS ?
 	repoProduct := repository.NewProductRepository(db)
 	repoUser := repository.NewUserRepository(db)
+	repoMerch := repository.NewMerchanRepository(db)
 
 	cookie, err := c.Cookie("user")
 	if err != nil {
@@ -34,7 +37,7 @@ func RegisterAProduct(c echo.Context) error {
 	}
 
 	username := cookie.Value
-	_, err = repoUser.GetIDByUsername(username)
+	userId, err := repoUser.GetIDByUsername(username)
 	if err != nil {
 		return err
 	}
@@ -46,10 +49,22 @@ func RegisterAProduct(c echo.Context) error {
 		return err
 	}
 
+	merchId, err := repoMerch.GetMerchantId(userId)
+	if err != nil {
+		return err
+	}
+
+	merchProd := []model.MerchantProduct{
+		{
+			MerchantID: *merchId,
+		},
+	}
+
 	product := &model.Product{
-		Name:  body.Name,
-		Sku:   body.Sku,
-		Image: body.Image,
+		Name:            body.Name,
+		Sku:             body.Sku,
+		Image:           body.Image,
+		MerchantProduct: merchProd,
 	}
 
 	err = repoProduct.CreateProduct(product)
