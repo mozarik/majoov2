@@ -25,25 +25,25 @@ type Merchant struct {
 }
 
 type MerchantProduct struct {
-	Product    []Product `gorm:"foreignkey:ID ;association_foreignkey:Product_id" json:"product"`
-	Product_id uint      `gorm:"primarykey" json:"product_id"`
-	MerchantID uint      `json:"merchant_id"`
+	ProductID     uint            `gorm:"primarykey" json:"product_id"`
+	MerchantID    uint            `json:"merchant_id"`
+	ProductOutlet []ProductOutlet `gorm:"foreignkey:ProductID;association_foreignkey:ProductID"`
 }
 
 type Product struct {
 	gorm.Model
-	Name  string `json:"name"`
-	Sku   uint   `json:"sku"`
-	Image string `json:"image"`
+	Name            string            `json:"name"`
+	Sku             uint              `json:"sku"`
+	Image           string            `json:"image"`
+	MerchantProduct []MerchantProduct `gorm:"foreignkey:ProductID;association_foreignkey:ID"`
 }
 
 type ProductOutlet struct {
 	gorm.Model
-	Product    []MerchantProduct `gorm:"foreignkey:Product_id;association_foreignkey:Product_id" json:"product"`
-	Outlet     []*Outlet         `gorm:"many2many:join_table"`
-	Product_id uint
-	Outlet_id  uint
-	Price      uint
+	Outlet    []*Outlet `gorm:"many2many:join_table"`
+	ProductID uint
+	Outlet_id uint
+	Price     uint
 }
 
 type Outlet struct {
@@ -56,6 +56,7 @@ type Outlet struct {
 func Migrate(db *gorm.DB) {
 	fmt.Println("Migrating DB")
 	db.AutoMigrate(
+		&MerchantProduct{},
 		&User{},
 		&Merchant{},
 		&Product{},
@@ -77,6 +78,7 @@ func InitDatabase() (*gorm.DB, error) {
 func Drop(db *gorm.DB) {
 	fmt.Println("Dropping DB")
 	db.Migrator().DropTable(
+		&MerchantProduct{},
 		&User{},
 		&Merchant{},
 		&Product{},

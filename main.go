@@ -18,10 +18,12 @@ func Ping(c echo.Context) error {
 
 func main() {
 	db, err := model.InitDatabase()
-	model.Drop(db)
+
 	if err != nil {
 		panic(err)
 	}
+
+	model.Drop(db)
 	model.Migrate(db)
 
 	e := echo.New()
@@ -34,8 +36,8 @@ func main() {
 	e.POST("/login", handler.Login)
 	e.POST("/logout", handler.Logout)
 
-	// e.POST("/product/add", handler.RegisterAProduct)
 	e.POST("/merchant/register", handler.RegisterMerchant)
+	e.POST("/product/add", handler.RegisterAProduct)
 	adminGroup := e.Group("/admin")
 
 	adminGroup.Use(echomid.JWTWithConfig(echomid.JWTConfig{
