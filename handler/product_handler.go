@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/base64"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -9,14 +11,18 @@ import (
 	"gorm.io/gorm"
 )
 
+func toBase64(b []byte) string {
+	return base64.StdEncoding.EncodeToString(b)
+}
+
 func GetAllProduct(c echo.Context) {
 	panic("Implement me")
 }
 
 type RegisterProductBody struct {
-	Name  string `json:"name"`
-	Sku   uint   `json:"sku"`
-	Image string `json:"image"`
+	Name  string `json:"name" form:"name"`
+	Sku   uint   `json:"sku" form:"sku"`
+	Image string `json:"image" form:"image"`
 }
 
 func NewRegisterProductBody() *RegisterProductBody {
@@ -26,7 +32,7 @@ func NewRegisterProductBody() *RegisterProductBody {
 func RegisterAProduct(c echo.Context) error {
 	db, _ := c.Get("db").(*gorm.DB)
 
-	// WHY IT HAVE TO BE LIKE THIS ?
+	// THIS IS DRY
 	repoProduct := repository.NewProductRepository(db)
 	repoUser := repository.NewUserRepository(db)
 	repoMerch := repository.NewMerchanRepository(db)
@@ -36,11 +42,30 @@ func RegisterAProduct(c echo.Context) error {
 		return err
 	}
 
+	file, err := c.FormFile("image")
+	if err != nil {
+		return err
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	byteContainer, err := ioutil.ReadAll(src) // why the long names though?
+	if err != nil {
+		return err
+	}
+
 	username := cookie.Value
 	userId, err := repoUser.GetIDByUsername(username)
 	if err != nil {
 		return err
 	}
+
+	ImageBase64String := toBase64(byteContainer)
+	// log.Println(base64String)
 
 	var body RegisterProductBody
 
@@ -63,7 +88,7 @@ func RegisterAProduct(c echo.Context) error {
 	product := &model.Product{
 		Name:            body.Name,
 		Sku:             body.Sku,
-		Image:           body.Image,
+		Image:           ImageBase64String,
 		MerchantProduct: merchProd,
 	}
 
