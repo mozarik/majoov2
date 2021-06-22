@@ -11,6 +11,28 @@ import (
 
 // func ReadAllUser()
 
+func GetCurrentUser(c echo.Context) error {
+	db, _ := c.Get("db").(*gorm.DB)
+	repoUser := repository.NewUserRepository(db)
+
+	cookie, err := c.Cookie("user")
+	if err != nil {
+		return err
+	}
+
+	username := cookie.Value
+
+	u, err := repoUser.ReturnCurrentUser(username)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Something is wrong",
+		})
+	}
+
+	return c.JSON(http.StatusAccepted, u)
+
+}
+
 func RegisterUser(c echo.Context) error {
 	type RegisterUserBody struct {
 		Username string `json:"username" validate:"required"`

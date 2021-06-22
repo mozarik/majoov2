@@ -38,6 +38,8 @@ func main() {
 
 	e.POST("/merchant/register", handler.RegisterMerchant)
 	e.POST("/product/add", handler.RegisterAProduct)
+
+	e.GET("/user", handler.GetCurrentUser)
 	adminGroup := e.Group("/admin")
 
 	adminGroup.Use(echomid.JWTWithConfig(echomid.JWTConfig{

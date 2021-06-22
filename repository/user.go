@@ -3,6 +3,7 @@ package repository
 import (
 	model "github.com/mozarik/majoov2/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type userRepository struct {
@@ -13,6 +14,24 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 	return &userRepository{
 		db: db,
 	}
+}
+
+func (u *userRepository) ReturnCurrentUser(username string) (*model.User, error) {
+	user := &model.User{}
+	// err := u.db.Where("username = ?", username).First(&user).Error
+	err := u.db.Preload(clause.Associations).Where("username = ?", username).Find(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, err
+}
+
+func (u *userRepository) ReturnAllUser() (*model.User, error) {
+	err := u.db.Find(&model.User{}).Error
+	if err != nil {
+		return nil, err
+	}
+	return &model.User{}, err
 }
 
 func (u *userRepository) Register(user *model.User) error {
