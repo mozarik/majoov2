@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// func ReadAllUser()
+func ReadAllUser()
 
 func GetCurrentUser(c echo.Context) error {
 	db, _ := c.Get("db").(*gorm.DB)
