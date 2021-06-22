@@ -7,9 +7,15 @@ This is an implementation of the test case from majoo implemented in Go.
 ### Documentation
 ---
 - [ ] Entity Relationship Diagram
+
+![ERD](https://raw.githubusercontent.com/mozarik/majoov2/main/static/ERD.png)
+
 - [ ] Data Manipulation Language
 - [ ] Activity Diagrams
+
 - [ ] Use Case Diagrams
+
+![ActivityDiagram](https://github.com/mozarik/majoov2/blob/main/static/UseCaseMajooV2.jpg)
 
 ---
 ### Implementation
