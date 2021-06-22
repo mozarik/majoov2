@@ -57,6 +57,6 @@ This is an implementation of the test case from majoo implemented in Go.
   ---
 - [ ] CRUD of Master Data Produk
   - [ ] As a merchant i can add (CREATE) product (JWT)
-  - [ ] As a merchant i can RETRIEVE all my products (JWT)
+  - [ ] As a merchant i can RETRIEVE all MY (`Merchant.ID`) products (JWT)
   - [ ] As a merchant i can UPDATE a product(s) (JWT)
   - [ ] As a merchant i can DELETE a product(s)  (JWT)
