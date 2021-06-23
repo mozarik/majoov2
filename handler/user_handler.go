@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func ReadAllUser()
+// func ReadAllUser()
 
 func GetCurrentUser(c echo.Context) error {
 	db, _ := c.Get("db").(*gorm.DB)
@@ -31,6 +31,18 @@ func GetCurrentUser(c echo.Context) error {
 
 	return c.JSON(http.StatusAccepted, u)
 
+}
+
+func GetAllUser(c echo.Context) error {
+	db, _ := c.Get("db").(*gorm.DB)
+	repoUser := repository.NewUserRepository(db)
+
+	user, err := repoUser.ReturnAllUser()
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusAccepted, user)
 }
 
 func RegisterUser(c echo.Context) error {

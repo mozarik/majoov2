@@ -17,15 +17,14 @@ func Ping(c echo.Context) error {
 }
 
 func main() {
-	db, err := model.InitDatabase()
 
+	db, err := model.InitDatabase()
 	if err != nil {
 		panic(err)
 	}
 
 	model.Drop(db)
 	model.Migrate(db)
-
 	e := echo.New()
 
 	e.Validator = &middleware.CustomValidator{Validator: validator.New()}
