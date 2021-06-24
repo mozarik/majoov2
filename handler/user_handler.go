@@ -1,72 +1,78 @@
 package handler
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	model "github.com/mozarik/majoov2/models"
-	"github.com/mozarik/majoov2/repository"
-	"gorm.io/gorm"
+	postgres "github.com/mozarik/majoov2/internal/db"
 )
 
-// func ReadAllUser()
+func UpdateUserToMerchant(c echo.Context) error {
+	db, _ := c.Get("db").(*postgres.Queries)
 
-func GetCurrentUser(c echo.Context) error {
-	db, _ := c.Get("db").(*gorm.DB)
-	repoUser := repository.NewUserRepository(db)
-
-	cookie, err := c.Cookie("user")
-	if err != nil {
-		return err
+	username, err := c.Cookie("user")
+	if err != nil && username.Value == "" {
+		return c.JSON(http.StatusForbidden, map[string]interface{}{
+			"message": "Need login",
+			"error":   err,
+		})
 	}
-
-	username := cookie.Value
-
-	u, err := repoUser.ReturnCurrentUser(username)
+	id, err := db.UpdateUserToMerchant(context.Background(), username.Value)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "Something is wrong",
+			"message": err,
 		})
 	}
 
-	return c.JSON(http.StatusAccepted, u)
-
+	return c.JSON(http.StatusAccepted, map[string]interface{}{
+		"message": fmt.Sprintf("%s with id %d is updated to be a merchant", username.Value, id),
+	})
 }
 
+// MANUAL TEST AND ITS WORKS
 func GetAllUser(c echo.Context) error {
-	db, _ := c.Get("db").(*gorm.DB)
-	repoUser := repository.NewUserRepository(db)
+	db, _ := c.Get("db").(*postgres.Queries)
 
-	user, err := repoUser.ReturnAllUser()
+	user, err := db.GetUsers(context.Background())
 	if err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err,
+		})
 	}
 
 	return c.JSON(http.StatusAccepted, user)
 }
 
-func RegisterUser(c echo.Context) error {
-	type RegisterUserBody struct {
-		Username string `json:"username" validate:"required"`
-		Password string `json:"password" validate:"required"`
-		Role     string `json:"role" validate:"required,oneof=merchant outlet"`
+func IsUserNameExist(username string, db *postgres.Queries) (bool, error) {
+	id, err := db.IsUsernameExist(context.Background(), username)
+	if id != 0 {
+		return true, err
 	}
+	return false, err
+}
 
-	// v := validator.New()
-	db, _ := c.Get("db").(*gorm.DB)
-	repo := repository.NewUserRepository(db)
+type RegisterUserBody struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
+
+// MANUAL TEST AND WORK
+func RegisterUser(c echo.Context) error {
+	db, _ := c.Get("db").(*postgres.Queries)
+
 	var body RegisterUserBody
-
 	err := c.Bind(&body)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Bad Request",
+		})
 	}
 
-	// err = v.Struct(&body)
-	// Validate body
-	status, _ := repo.UsernameIsInDb(body.Username)
-	if !status {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+	status, _ := IsUserNameExist(body.Username, db)
+	if status {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message": "Username already exist",
 		})
 	}
@@ -78,19 +84,19 @@ func RegisterUser(c echo.Context) error {
 		})
 	}
 
-	u := &model.User{
+	user, err := db.CreateUser(context.Background(), postgres.CreateUserParams{
 		Username: body.Username,
 		Password: body.Password,
-		Role:     body.Role,
-	}
+	})
 
-	err = repo.Register(u)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Success",
-		"data":    &body,
+		"message": "User is Created",
+		"data":    &user,
 	})
 }

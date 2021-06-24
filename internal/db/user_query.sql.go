@@ -60,6 +60,18 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 	return i, err
 }
 
+const getUserPassword = `-- name: GetUserPassword :one
+SELECT password FROM users
+WHERE username = $1
+`
+
+func (q *Queries) GetUserPassword(ctx context.Context, username string) (string, error) {
+	row := q.queryRow(ctx, q.getUserPasswordStmt, getUserPassword, username)
+	var password string
+	err := row.Scan(&password)
+	return password, err
+}
+
 const getUsers = `-- name: GetUsers :many
 SELECT id, username, password, role FROM users
 `
@@ -91,6 +103,18 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const isUsernameExist = `-- name: IsUsernameExist :one
+SELECT id FROM users
+WHERE username = $1
+`
+
+func (q *Queries) IsUsernameExist(ctx context.Context, username string) (int32, error) {
+	row := q.queryRow(ctx, q.isUsernameExistStmt, isUsernameExist, username)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
 }
 
 const updateUserPassword = `-- name: UpdateUserPassword :exec

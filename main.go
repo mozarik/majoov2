@@ -1,14 +1,17 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	echomid "github.com/labstack/echo/v4/middleware"
+	_ "github.com/lib/pq"
 	"github.com/mozarik/majoov2/auth"
 	"github.com/mozarik/majoov2/handler"
+	postgres "github.com/mozarik/majoov2/internal/db"
 	"github.com/mozarik/majoov2/middleware"
-	model "github.com/mozarik/majoov2/models"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -16,15 +19,23 @@ func Ping(c echo.Context) error {
 	return c.JSON(http.StatusOK, "connected")
 }
 
+func InitDatabase() (*postgres.Queries, error) {
+	conn, err := sql.Open("postgres", "user=root password=root dbname=root sslmode=disable")
+	if err != nil {
+		return nil, err
+	}
+
+	db := postgres.New(conn)
+	fmt.Println("Database Connected")
+	return db, nil
+}
+
 func main() {
 
-	db, err := model.InitDatabase()
+	db, err := InitDatabase()
 	if err != nil {
 		panic(err)
 	}
-
-	model.Drop(db)
-	model.Migrate(db)
 	e := echo.New()
 
 	e.Validator = &middleware.CustomValidator{Validator: validator.New()}
@@ -32,13 +43,18 @@ func main() {
 
 	e.GET("/", Ping)
 	e.POST("/register", handler.RegisterUser)
+	e.GET("/getallusers", handler.GetAllUser)
+
+	// Add this to JWT Group
+	e.POST("/user/updatemerchant", handler.UpdateUserToMerchant)
+
 	e.POST("/login", handler.Login)
 	e.POST("/logout", handler.Logout)
 
-	e.POST("/merchant/register", handler.RegisterMerchant)
-	e.POST("/product/add", handler.RegisterAProduct)
+	e.POST("/merchant/register", handler.UpdateUserToMerchant)
+	e.POST("/product/add", handler.InsertProduct)
 
-	e.GET("/user", handler.GetCurrentUser)
+	// e.GET("/user", handler.GetCurrentUser)
 	adminGroup := e.Group("/admin")
 
 	adminGroup.Use(echomid.JWTWithConfig(echomid.JWTConfig{
