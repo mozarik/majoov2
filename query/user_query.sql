@@ -36,3 +36,8 @@ WHERE id = $1;
 -- name: IsUsernameExist :one
 SELECT id FROM users
 WHERE username = $1;
+
+-- name: AddMerchantFromUser :one
+INSERT INTO merchants (name, user_id)
+VALUES ($1, $2)
+RETURNING *;

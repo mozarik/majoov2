@@ -9,6 +9,10 @@ import (
 	postgres "github.com/mozarik/majoov2/internal/db"
 )
 
+type RegisterUserMerchantBody struct {
+	Name string `json:"name" validate:"required"`
+}
+
 func UpdateUserToMerchant(c echo.Context) error {
 	db, _ := c.Get("db").(*postgres.Queries)
 
@@ -19,15 +23,36 @@ func UpdateUserToMerchant(c echo.Context) error {
 			"error":   err,
 		})
 	}
-	id, err := db.UpdateUserToMerchant(context.Background(), username.Value)
+	_, err = db.UpdateUserToMerchant(context.Background(), username.Value)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message": err,
 		})
 	}
 
+	var body RegisterUserMerchantBody
+	err = c.Bind(&body)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Bad Request",
+		})
+	}
+
+	user_id, err := db.IsUsernameExist(context.Background(), username.Value)
+	if err != nil {
+		return err
+	}
+
+	insertMerchant, err := db.AddMerchantFromUser(context.Background(), postgres.AddMerchantFromUserParams{
+		Name:   body.Name,
+		UserID: user_id,
+	})
+	if err != nil {
+		return err
+	}
+
 	return c.JSON(http.StatusAccepted, map[string]interface{}{
-		"message": fmt.Sprintf("%s with id %d is updated to be a merchant", username.Value, id),
+		"message": fmt.Sprintf("%s with id %d is updated to be a merchant", username.Value, insertMerchant.UserID),
 	})
 }
 

@@ -22,6 +22,9 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.addMerchantFromUserStmt, err = db.PrepareContext(ctx, addMerchantFromUser); err != nil {
+		return nil, fmt.Errorf("error preparing query AddMerchantFromUser: %w", err)
+	}
 	if q.addProductStmt, err = db.PrepareContext(ctx, addProduct); err != nil {
 		return nil, fmt.Errorf("error preparing query AddProduct: %w", err)
 	}
@@ -66,6 +69,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.addMerchantFromUserStmt != nil {
+		if cerr := q.addMerchantFromUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addMerchantFromUserStmt: %w", cerr)
+		}
+	}
 	if q.addProductStmt != nil {
 		if cerr := q.addProductStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing addProductStmt: %w", cerr)
@@ -170,6 +178,7 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                         DBTX
 	tx                         *sql.Tx
+	addMerchantFromUserStmt    *sql.Stmt
 	addProductStmt             *sql.Stmt
 	createUserStmt             *sql.Stmt
 	deleteProductStmt          *sql.Stmt
@@ -189,6 +198,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                         tx,
 		tx:                         tx,
+		addMerchantFromUserStmt:    q.addMerchantFromUserStmt,
 		addProductStmt:             q.addProductStmt,
 		createUserStmt:             q.createUserStmt,
 		deleteProductStmt:          q.deleteProductStmt,

@@ -7,6 +7,24 @@ import (
 	"context"
 )
 
+const addMerchantFromUser = `-- name: AddMerchantFromUser :one
+INSERT INTO merchants (name, user_id)
+VALUES ($1, $2)
+RETURNING id, name, user_id
+`
+
+type AddMerchantFromUserParams struct {
+	Name   string `json:"name"`
+	UserID int32  `json:"userID"`
+}
+
+func (q *Queries) AddMerchantFromUser(ctx context.Context, arg AddMerchantFromUserParams) (Merchant, error) {
+	row := q.queryRow(ctx, q.addMerchantFromUserStmt, addMerchantFromUser, arg.Name, arg.UserID)
+	var i Merchant
+	err := row.Scan(&i.ID, &i.Name, &i.UserID)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, password)
 VALUES ($1, $2) 

@@ -22,7 +22,7 @@ func GetAllProduct(c echo.Context) {
 
 type RegisterProductBody struct {
 	Name  string `json:"name" form:"name"`
-	Sku   uint   `json:"sku" form:"sku"`
+	Sku   string `json:"sku" form:"sku"`
 	Image string `json:"image" form:"image"`
 }
 
@@ -63,7 +63,7 @@ func InsertProduct(c echo.Context) error {
 		})
 	}
 
-	var body postgres.AddProductParams
+	var body RegisterProductBody
 	err = c.Bind(&body)
 	if err != nil {
 		return err
@@ -83,8 +83,13 @@ func InsertProduct(c echo.Context) error {
 		return err
 	}
 
+	user_id, err := db.IsUsernameExist(context.Background(), cookie.Value)
+	if err != nil {
+		return err
+	}
+
 	var merchantData postgres.InsertMerchantProductParams
-	merchantID, err := db.GetMerchantID(context.Background(), cookie.Value)
+	merchantID, err := db.GetMerchantID(context.Background(), user_id)
 	if err != nil {
 		return err
 	}
@@ -99,7 +104,7 @@ func InsertProduct(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": fmt.Sprintf(("Success inserted %s with %d id Product with id %d"), cookie.Value, insertMerchantID, productID.ID),
+		"message": fmt.Sprintf(("Success inserted %s merchant product with %d id Product with id %d"), cookie.Value, insertMerchantID, productID.ID),
 	})
 
 }

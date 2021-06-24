@@ -46,7 +46,7 @@ func main() {
 	e.GET("/getallusers", handler.GetAllUser)
 
 	// Add this to JWT Group
-	e.POST("/user/updatemerchant", handler.UpdateUserToMerchant)
+	// e.POST("/user/updatemerchant", handler.UpdateUserToMerchant)
 
 	e.POST("/login", handler.Login)
 	e.POST("/logout", handler.Logout)
