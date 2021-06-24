@@ -106,5 +106,30 @@ func InsertProduct(c echo.Context) error {
 	return c.JSON(http.StatusCreated, map[string]interface{}{
 		"message": fmt.Sprintf(("Success inserted %s merchant product with %d id Product with id %d"), cookie.Value, insertMerchantID, productID.ID),
 	})
+}
 
+func GetAllMerchantProducts(c echo.Context) error {
+	db, _ := c.Get("db").(*postgres.Queries)
+
+	cookie, err := c.Cookie("user")
+	if err != nil {
+		return err
+	}
+
+	user_id, err := db.IsUsernameExist(context.Background(), cookie.Value)
+	if err != nil {
+		return err
+	}
+
+	merchantID, err := db.GetMerchantID(context.Background(), user_id)
+	if err != nil {
+		return err
+	}
+
+	products, err := db.GetAllMerchantProducts(context.Background(), merchantID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, products)
 }
