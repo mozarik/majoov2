@@ -51,8 +51,9 @@ func main() {
 	e.POST("/login", handler.Login)
 	e.POST("/logout", handler.Logout)
 
-	e.POST("/merchant/register", handler.UpdateUserToMerchant)
+	// e.POST("/merchant/register", handler.UpdateUserToMerchant)
 	e.POST("/product/add", handler.InsertProduct)
+	e.GET("/merchant/products", handler.GetAllMerchantProducts)
 
 	// e.GET("/user", handler.GetCurrentUser)
 	adminGroup := e.Group("/admin")
@@ -66,6 +67,16 @@ func main() {
 
 	adminGroup.Use(auth.TokenRefresherMiddleware)
 	adminGroup.GET("", handler.Admin)
+
+	merchantGroup := e.Group("/merchant")
+	merchantGroup.Use(echomid.JWTWithConfig(echomid.JWTConfig{
+		Claims:                  &auth.Claims{},
+		SigningKey:              []byte(auth.GetJWTSecret()),
+		TokenLookup:             "cookie:access-token",
+		ErrorHandlerWithContext: auth.JWTErrorChecker,
+	}))
+
+	merchantGroup.POST("/register", handler.UpdateUserToMerchant)
 
 	e.Logger.Fatal(e.Start(":4001"))
 }
